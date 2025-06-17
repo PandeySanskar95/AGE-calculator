@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)http://127.0.0.1:5500/calculator.html/calculator.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Age Calculator</title>
+  <link href="./Age Calculator_files/css2" rel="stylesheet">
+  <link href="./Age Calculator_files/icon" rel="stylesheet">
+  <style>
+    /* Reset and base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #ffffff;
+      color: #6b7280; /* neutral gray */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px;
+    }
+    h1 {
+      font-weight: 700;
+      font-size: 3rem;
+      color: #111827;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    main {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(255 255 255 / 0.8);
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+      padding: 32px;
+      backdrop-filter: saturate(180%) blur(10px);
+      -webkit-backdrop-filter: saturate(180%) blur(10px);
+    }
+    form {
+      display: grid;
+      gap: 24px;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: #374151;
+    }
+    input[type="number"] {
+      padding: 12px 16px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 1.125rem;
+      color: #111827;
+      transition: border-color 0.3s ease;
+    }
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #4f46e5; /* Indigo-600 */
+      box-shadow: 0 0 6px rgba(79, 70, 229, 0.4);
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    /* Button styles */
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #4f46e5, #9333ea);
+      color: white;
+      font-weight: 700;
+      font-size: 1.25rem;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 24px;
+      cursor: pointer;
+      box-shadow: 0 6px 15px rgba(79, 70, 229, 0.5);
+      transition: background 0.3s ease, transform 0.2s ease;
+      user-select: none;
+    }
+    button:hover,
+    button:focus {
+      background: linear-gradient(135deg, #9333ea, #4f46e5);
+      transform: scale(1.05);
+      outline-offset: 4px;
+      outline: 2px solid #c4b5fd;
+    }
+    .material-icons {
+      font-size: 24px;
+      line-height: 1;
+    }
+    /* Result card */
+    .result-card {
+      margin-top: 32px;
+      background: rgba(243 244 246 / 0.9);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      color: #111827;
+      font-weight: 700;
+      font-size: 1.5rem;
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    /* Error message */
+    .error-message {
+      color: #dc2626; /* Red-600 */
+      font-weight: 600;
+      font-size: 1rem;
+      margin-top: -16px;
+      margin-bottom: 16px;
+    }
+    /* Responsive typography */
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 2.5rem;
+      }
+      button {
+        font-size: 1.125rem;
+        padding: 12px 20px;
+      }
+      .result-card {
+        font-size: 1.25rem;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Age Calculator</h1>
+  <main>
+    <form id="ageForm" aria-label="Age calculator form" novalidate="">
+      <div class="input-group">
+        <label for="day">Day</label>
+        <input type="number" id="day" name="day" placeholder="DD" min="1" max="31" required="" aria-required="true" aria-describedby="dayHelp" autocomplete="off">
+      </div>
+      <div class="input-group">
+        <label for="month">Month</label>
+        <input type="number" id="month" name="month" placeholder="MM" min="1" max="12" required="" aria-required="true" aria-describedby="monthHelp" autocomplete="off">
+      </div>
+      <div class="input-group">
+        <label for="year">Year</label>
+        <input type="number" id="year" name="year" placeholder="YYYY" min="1900" max="9999" required="" aria-required="true" aria-describedby="yearHelp" autocomplete="off">
+      </div>
+      <button type="submit" aria-label="Calculate age">
+        <span class="material-icons" aria-hidden="true">calculate</span>
+        Calculate
+      </button>
+      <div aria-live="polite" aria-atomic="true" class="error-message" id="errorMsg" role="alert" style="display:none;"></div>
+    </form>
+    <div class="result-card" aria-live="polite" aria-atomic="true" id="result" role="region" aria-label="Calculated age result">
+      Enter your date of birth and press Calculate.
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      const form = document.getElementById('ageForm');
+      const dayInput = form.day;
+      const monthInput = form.month;
+      const yearInput = form.year;
+      const resultDiv = document.getElementById('result');
+      const errorDiv = document.getElementById('errorMsg');
+
+      /**
+       * Validates whether the provided day, month, year represent a valid calendar date.
+       * @param {number} day 
+       * @param {number} month 
+       * @param {number} year 
+       * @returns {boolean}
+       */
+      function isValidDate(day, month, year) {
+        // JavaScript months are 0-based, so subtract 1
+        const date = new Date(year, month - 1, day);
+        return (
+          date.getFullYear() === year &&
+          date.getMonth() === month - 1 &&
+          date.getDate() === day
+        );
+      }
+
+      /**
+       * Calculates age difference between today and the birth date.
+       * @param {Date} birthDate 
+       * @param {Date} currentDate 
+       * @returns {{years: number, months: number, days: number}}
+       */
+      function calculateAge(birthDate, currentDate) {
+        let years = currentDate.getFullYear() - birthDate.getFullYear();
+        let months = currentDate.getMonth() - birthDate.getMonth();
+        let days = currentDate.getDate() - birthDate.getDate();
+
+        if (days < 0) {
+          // borrow days from previous month
+          months -= 1;
+          const prevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+          days += prevMonth.getDate();
+        }
+        if (months < 0) {
+          months += 12;
+          years -= 1;
+        }
+
+        return { years, months, days };
+      }
+
+      function clearError() {
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+      }
+
+      function showError(message) {
+        errorDiv.style.display = 'block';
+        errorDiv.textContent = message;
+        resultDiv.textContent = '';
+      }
+
+      form.addEventListener('submit', (evt) => {
+        evt.preventDefault();
+        clearError();
+
+        const day = parseInt(dayInput.value, 10);
+        const month = parseInt(monthInput.value, 10);
+        const year = parseInt(yearInput.value, 10);
+
+        if (
+          Number.isNaN(day) || Number.isNaN(month) || Number.isNaN(year) ||
+          day < 1 || day > 31 ||
+          month < 1 || month > 12 ||
+          year < 1900 || year > new Date().getFullYear()
+        ) {
+          showError('Please enter a valid date of birth.');
+          return;
+        }
+
+        if (!isValidDate(day, month, year)) {
+          showError('Entered date is not a valid calendar date.');
+          return;
+        }
+
+        const birthDate = new Date(year, month - 1, day);
+        const today = new Date();
+
+        if (birthDate > today) {
+          showError('Date of birth cannot be in the future.');
+          return;
+        }
+
+        const age = calculateAge(birthDate, today);
+
+        resultDiv.textContent = `You are ${age.years} year${age.years !== 1 ? 's' : ''}, ${age.months} month${age.months !== 1 ? 's' : ''}, and ${age.days} day${age.days !== 1 ? 's' : ''} old.`;
+      });
+    })();
+  </script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+
+
+
+</body></html>
